@@ -1,10 +1,14 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useSocket } from "../context/SocketProvider";
 
 export default function Lobby() {
   const [userDetail, SetUserDetail] = useState({
     email: "",
     room: "",
   });
+
+  const socket = useSocket();
+
 
   const handleUserDetail = (e) => {
     SetUserDetail({
@@ -16,10 +20,16 @@ export default function Lobby() {
   const handleSubmit = useCallback(
     (e) => {
       e.preventDefault();
-      console.log(userDetail);
+      socket.emit("room:join", userDetail);
     },
-    [userDetail]
+    [socket, userDetail]
   );
+
+  useEffect(() => {
+    socket.on("room:join", data => {
+      console.log(`data from server: ${data}`);
+    });
+  }, [socket])
 
   return (
     <>
