@@ -21,18 +21,31 @@ export default function Room() {
   }, [remoteSocketId, socket])
 
 
-  const handleIncommingCall = useCallback(({ from, offer }) => {
-    console.log("incoming call", from, offer);
+  const handleIncomingCall = useCallback(async ({ from, offer }) => {
+    setRemoteSocketId(from);
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true,
+    });
+    setMyStream(stream);
+    const ans = peer.getAnswer(offer);
+    socket.emit("call:accepted", {to: from, ans})
+  }, [socket])
+
+  const handleCallAccepted = useCallback(({ from, ans }) => {
+    
   }, [])
 
   useEffect(() => {
     socket.on("user:joined", handleUserJoined);
-    socket.on("incomming:call", handleIncommingCall);
+    socket.on("incoming:call", handleIncomingCall);
+    socket.on("call:accepted", handleCallAccepted);
     return () => {
       socket.off("user:joined", handleUserJoined);
-      socket.off("incomming:call", handleIncommingCall);
+      socket.off("incoming:call", handleIncomingCall);
+      socket.off("call:accepted", handleCallAccepted);
     }
-  }, [socket, handleUserJoined, handleIncommingCall])
+  }, [socket, handleUserJoined, handleIncomingCall])
 
   return <>
     Room Page
