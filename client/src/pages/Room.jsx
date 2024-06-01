@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useSocket } from "../context/SocketProvider"
+import { useSocket } from "../context/SocketProvider";
 import ReactPlayer from "react-player";
 import peer from "../service/peer";
 
@@ -12,54 +12,97 @@ export default function Room() {
   const handleUserJoined = useCallback(({ email, id }) => {
     console.log(`email ${email} joined`);
     setRemoteSocketId(id);
-  }, [])
+  }, []);
 
   const handleCallUser = useCallback(async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-    const offer = await peer.getOffer();
-    socket.emit("user:call", { to: remoteSocketId, offer });
-    setMyStream(stream);
-  }, [remoteSocketId, socket])
-
-
-  const handleIncomingCall = useCallback(async ({ from, offer }) => {
-    console.log("incoming call", from);
-    setRemoteSocketId(from);
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: true,
       video: true,
     });
+    const offer = await peer.getOffer();
+    socket.emit("user:call", { to: remoteSocketId, offer });
     setMyStream(stream);
-    const ans = await peer.getAnswer(offer);
-    socket.emit("call:accepted", {to: from, ans})
-  }, [socket])
+  }, [remoteSocketId, socket]);
 
-  const handleCallAccepted = useCallback(({ from, ans }) => {
-    peer.setLocalDescription(ans);
-    console.log("call accepted");
-    for (const track of myStream.getTracks()) {
-      peer.peer.addTrack(track, myStream);
-    }
-  }, [myStream])
+  const handleIncomingCall = useCallback(
+    async ({ from, offer }) => {
+      console.log("incoming call", from);
+      setRemoteSocketId(from);
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: true,
+      });
+      setMyStream(stream);
+      const ans = await peer.getAnswer(offer);
+      socket.emit("call:accepted", { to: from, ans });
+    },
+    [socket]
+  );
 
+  const handleCallAccepted = useCallback(
+    ({ from, ans }) => {
+      peer.setLocalDescription(ans);
+      console.log("call accepted");
+      for (const track of myStream.getTracks()) {
+        peer.peer.addTrack(track, myStream);
+      }
+    },
+    [myStream]
+  );
+
+  const handleNegoNeeded = useCallback(async () => {
+    const offer = await peer.getOffer();
+    socket.emit("peer:nego:needed", { offer, to: remoteSocketId });
+  }, [socket, remoteSocketId]);
+
+  const handleNegoIncoming = useCallback(
+    async ({ from, offer }) => {
+      const ans = await peer.getAnswer(offer);
+      socket.emit("peer:nego:done", { to: from, ans });
+    },
+    [socket]
+  );
+
+  const handleNegoFinal = useCallback(async ({ ans }) => {
+    await peer.setLocalDescription(ans);
+  }, []);
 
   useEffect(() => {
-    peer.peer.addEventListener("track", async ev => {
+    peer.peer.addEventListener("negotiationneeded", handleNegoNeeded);
+    return () => {
+      peer.peer.removeEventListener("negotiationneeded", handleNegoNeeded);
+    };
+  }, [handleNegoNeeded]);
+
+  useEffect(() => {
+    peer.peer.addEventListener("track", async (ev) => {
       const remoteStream = ev.streams;
       setRemoteStream(remoteStream);
-    })
-  })
+    });
+  }, []);
 
   useEffect(() => {
     socket.on("user:joined", handleUserJoined);
     socket.on("incoming:call", handleIncomingCall);
     socket.on("call:accepted", handleCallAccepted);
+    socket.on("peer:nego:needed", handleNegoIncoming);
+    socket.on("peer:nego:final", handleNegoFinal);
     return () => {
       socket.off("user:joined", handleUserJoined);
       socket.off("incoming:call", handleIncomingCall);
       socket.off("call:accepted", handleCallAccepted);
-    }
-  }, [socket, handleUserJoined, handleIncomingCall, handleCallAccepted])
+      socket.off("peer:nego:needed", handleNegoNeeded);
+      socket.off("peer:nego:final", handleNegoFinal);
+    };
+  }, [
+    socket,
+    handleUserJoined,
+    handleIncomingCall,
+    handleCallAccepted,
+    handleNegoNeeded,
+    handleNegoIncoming,
+    handleNegoFinal,
+  ]);
 
   return (
     <>
