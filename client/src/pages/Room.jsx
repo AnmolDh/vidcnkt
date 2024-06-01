@@ -39,21 +39,32 @@ export default function Room() {
     [socket]
   );
 
+  const sendStream = useCallback(() => {
+    for (const track of myStream.getTracks()) {
+      peer.peer.addTrack(track, myStream);
+    }
+  }, [myStream]);
+
   const handleCallAccepted = useCallback(
     ({ from, ans }) => {
       peer.setLocalDescription(ans);
       console.log("call accepted");
-      for (const track of myStream.getTracks()) {
-        peer.peer.addTrack(track, myStream);
-      }
+      sendStream();
     },
-    [myStream]
+    [sendStream]
   );
 
   const handleNegoNeeded = useCallback(async () => {
     const offer = await peer.getOffer();
     socket.emit("peer:nego:needed", { offer, to: remoteSocketId });
   }, [socket, remoteSocketId]);
+
+  useEffect(() => {
+    peer.peer.addEventListener("negotiationneeded", handleNegoNeeded);
+    return () => {
+      peer.peer.removeEventListener("negotiationneeded", handleNegoNeeded);
+    };
+  }, [handleNegoNeeded]);
 
   const handleNegoIncoming = useCallback(
     async ({ from, offer }) => {
@@ -67,17 +78,11 @@ export default function Room() {
     await peer.setLocalDescription(ans);
   }, []);
 
-  useEffect(() => {
-    peer.peer.addEventListener("negotiationneeded", handleNegoNeeded);
-    return () => {
-      peer.peer.removeEventListener("negotiationneeded", handleNegoNeeded);
-    };
-  }, [handleNegoNeeded]);
 
   useEffect(() => {
     peer.peer.addEventListener("track", async (ev) => {
       const remoteStream = ev.streams;
-      setRemoteStream(remoteStream);
+      setRemoteStream(remoteStream[0]);
     });
   }, []);
 
@@ -91,7 +96,7 @@ export default function Room() {
       socket.off("user:joined", handleUserJoined);
       socket.off("incoming:call", handleIncomingCall);
       socket.off("call:accepted", handleCallAccepted);
-      socket.off("peer:nego:needed", handleNegoNeeded);
+      socket.off("peer:nego:needed", handleNegoIncoming);
       socket.off("peer:nego:final", handleNegoFinal);
     };
   }, [
@@ -99,7 +104,6 @@ export default function Room() {
     handleUserJoined,
     handleIncomingCall,
     handleCallAccepted,
-    handleNegoNeeded,
     handleNegoIncoming,
     handleNegoFinal,
   ]);
@@ -108,6 +112,7 @@ export default function Room() {
     <>
       Room Page
       <h4>{remoteSocketId ? "connected" : "not connected"}</h4>
+      {myStream && <button onClick={sendStream}>Send Video/ Audio</button>}
       {remoteSocketId && <button onClick={handleCallUser}>Call</button>}
       {myStream && (
         <>
