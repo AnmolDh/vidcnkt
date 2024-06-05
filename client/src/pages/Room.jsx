@@ -24,12 +24,7 @@ export default function Room() {
     setMyStream(stream);
   }, [remoteSocketId, socket]);
 
-  useEffect(() => {
-    if (remoteSocketId) {
-      handleCallUser();
-    }
-  }, [remoteSocketId, handleCallUser]);
-
+  
   const handleIncomingCall = useCallback(
     async ({ from, offer }) => {
       console.log("incoming call", from);
@@ -66,12 +61,18 @@ export default function Room() {
   }, [socket, remoteSocketId]);
 
   useEffect(() => {
+    if (remoteSocketId) {
+      handleCallUser();
+    }
+  }, [remoteSocketId, handleCallUser]);
+  
+  useEffect(() => {
     peer.peer.addEventListener("negotiationneeded", handleNegoNeeded);
     return () => {
       peer.peer.removeEventListener("negotiationneeded", handleNegoNeeded);
     };
   }, [handleNegoNeeded]);
-
+  
   const handleNegoIncoming = useCallback(
     async ({ from, offer }) => {
       const ans = await peer.getAnswer(offer);
@@ -118,8 +119,6 @@ export default function Room() {
     <>
       Room Page
       <h4>{remoteSocketId ? "connected" : "not connected"}</h4>
-      {myStream && <button onClick={sendStream}>Send Video/ Audio</button>}
-      {remoteSocketId && <button onClick={handleCallUser}>Call</button>}
       {myStream && (
         <>
           <h3>My Stream</h3>
