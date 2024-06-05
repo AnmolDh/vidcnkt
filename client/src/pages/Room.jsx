@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSocket } from "../context/SocketProvider";
 import ReactPlayer from "react-player";
 import peer from "../service/peer";
 import useCallHandler from "../hooks/useCallHandlers";
+import useSocketEvent from "../hooks/useSocketEvents";
 
 export default function Room() {
   const socket = useSocket();
@@ -10,57 +11,9 @@ export default function Room() {
   const [myStream, setMyStream] = useState();
   const [remoteStream, setRemoteStream] = useState();
 
-  const {
-    handleUserJoined,
-    handleCallUser,
-    handleIncomingCall,
-    handleCallAccepted,
-    handleNegoNeeded,
-    handleNegoIncoming,
-    handleNegoFinal,
-  } = useCallHandler(socket, remoteSocketId, setRemoteSocketId, myStream, setMyStream);
+  const handlers = useCallHandler(socket, remoteSocketId, setRemoteSocketId, myStream, setMyStream);
 
-  useEffect(() => {
-    if (remoteSocketId) {
-      handleCallUser();
-    }
-  }, [remoteSocketId, handleCallUser]);
-
-  useEffect(() => {
-    peer.peer.addEventListener("negotiationneeded", handleNegoNeeded);
-    return () => {
-      peer.peer.removeEventListener("negotiationneeded", handleNegoNeeded);
-    };
-  }, [handleNegoNeeded]);
-
-  useEffect(() => {
-    peer.peer.addEventListener("track", async (ev) => {
-      const remoteStream = ev.streams;
-      setRemoteStream(remoteStream[0]);
-    });
-  }, []);
-
-  useEffect(() => {
-    socket.on("user:joined", handleUserJoined);
-    socket.on("incoming:call", handleIncomingCall);
-    socket.on("call:accepted", handleCallAccepted);
-    socket.on("peer:nego:needed", handleNegoIncoming);
-    socket.on("peer:nego:final", handleNegoFinal);
-    return () => {
-      socket.off("user:joined", handleUserJoined);
-      socket.off("incoming:call", handleIncomingCall);
-      socket.off("call:accepted", handleCallAccepted);
-      socket.off("peer:nego:needed", handleNegoIncoming);
-      socket.off("peer:nego:final", handleNegoFinal);
-    };
-  }, [
-    socket,
-    handleUserJoined,
-    handleIncomingCall,
-    handleCallAccepted,
-    handleNegoIncoming,
-    handleNegoFinal,
-  ]);
+  useSocketEvent(socket, remoteSocketId,  handlers, peer, setRemoteStream)
 
   return (
     <>
