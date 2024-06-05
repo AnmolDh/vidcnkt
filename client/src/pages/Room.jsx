@@ -24,6 +24,12 @@ export default function Room() {
     setMyStream(stream);
   }, [remoteSocketId, socket]);
 
+  useEffect(() => {
+    if (remoteSocketId) {
+      handleCallUser();
+    }
+  }, [remoteSocketId, handleCallUser]);
+
   const handleIncomingCall = useCallback(
     async ({ from, offer }) => {
       console.log("incoming call", from);
