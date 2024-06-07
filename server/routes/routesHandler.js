@@ -8,7 +8,7 @@ app.get("/", (req, res) => {
   res.send("hello");
 });
 
-app.post("/register", async (req, res) => {
+app.post("/signup", async (req, res) => {
   const { name, email, password } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
   const user = new User({ name, email, password: hashedPassword });
