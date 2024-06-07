@@ -22,12 +22,12 @@ app.post("/login", async (req, res) => {
   const user = await User.findOne({ email });
 
   if (!user) {
-    return res.status(404).json({ success: false, error: "user not found" });
+    return res.json({ success: false, error: "user not found" });
   }
 
   const passwordMatched = await bcrypt.compare(password, user.password);
   if (!passwordMatched) {
-    return res.status(400).json({ success: false, error: "invalid password" });
+    return res.json({ success: false, error: "invalid password" });
   }
 
   const token = jwt.sign({ userId: email }, process.env.JWT_SECRET);
