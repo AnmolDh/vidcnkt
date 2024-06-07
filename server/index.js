@@ -2,7 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const { Server } = require("socket.io");
 const mongoose = require("mongoose");
-const socketHandlers = require("./handlers/socketHandlers");
+const socketHandler = require("./handlers/socketHandler");
 const handleRoutes = require("./routes/routesHandler");
 require("dotenv").config();
 
@@ -23,7 +23,7 @@ const socketIdToEmail = new Map();
 
 io.on("connection", (socket) => {
   console.log("socket connected: ", socket.id);
-  socketHandlers(io, socket, emailToSocketId, socketIdToEmail);
+  socketHandler(io, socket, emailToSocketId, socketIdToEmail);
 });
 
 server.listen(process.env.PORT, () => console.log("server running!!"));
