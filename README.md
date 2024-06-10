@@ -15,46 +15,23 @@ VidCnkt is an open-source video conferencing web application built using React, 
 
 To run VidCnkt locally, follow these steps:
 
-### Server
-
 1. Clone the repository:
    ```bash
    git clone https://github.com/AnmolDh/vidcnkt.git
    cd vidcnkt
    ```
 
-2. Install server dependencies:
+2. Install all dependencies:
    ```bash
-   cd server
-   npm install
+   npm run install-all
    ```
 
-3. Start the server:
-   ```bash
-   npm start
-   ```
-
-### Client
-
-1. Open a new terminal window/tab.
-
-2. Navigate to the cloned repository:
-   ```bash
-   cd vidcnkt
-   ```
-
-3. Install client dependencies:
-   ```bash
-   cd client
-   npm install
-   ```
-
-4. Start the client:
+3. Start both server and client:
    ```bash
    npm start
    ```
 
-5. Open your browser and navigate to:
+4. Open your browser and navigate to:
    ```
    http://localhost:3000
    ```

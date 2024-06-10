@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "VidCnkt is an open-source video conferencing web application built using React, Node.js, Express, Socket.io, and WebRTC. It allows users to conduct real-time video and audio calls, chat, share screens, and exchange files securely.",
   "scripts": {
-    "install": "concurrently \"npm install --prefix client\" \"npm install --prefix server\"",
+    "install-all": "concurrently \"npm install --prefix client\" \"npm install --prefix server\"",
     "start": "concurrently \"npm run start-client\" \"npm run start-server\"",
     "start-client": "npm start --prefix client",
     "start-server": "npm start --prefix server"
