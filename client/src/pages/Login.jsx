@@ -38,6 +38,5 @@ export default function Login() {
 
       <button type="submit" onClick={handleSubmit}>login</button>
     </form>
-    <button onClick={() => {console.log(auth.user)}}>test</button>
   </>
 }
