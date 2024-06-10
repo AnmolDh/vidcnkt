@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "../api/api";
 import { useAuth } from "../context/AuthProvider";
 
@@ -9,6 +10,13 @@ export default function Signup() {
     password: "",
   });
   const auth = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (auth.user) {
+      navigate("/lobby");
+    }
+  }, [auth.user, navigate]);
 
   const handleInput = (e) => {
     setSignupDetails({
@@ -19,11 +27,8 @@ export default function Signup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const {data} = await axios.post(
-      `/signup`,
-      signupDetails
-    );
-    if (data.success == true) {
+    const { data } = await axios.post(`/signup`, signupDetails);
+    if (data.success === true) {
       localStorage.setItem("token", data.token);
       auth.setUser(data.userId);
     } else {

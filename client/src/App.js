@@ -7,9 +7,10 @@ import Signup from "./pages/Signup";
 function App() {
   return (
     <Routes>
+      <Route path="/" element={<Lobby />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
-      <Route path="/" element={<Lobby />} />
+      <Route path="/lobby" element={<Lobby />} />
       <Route path="/room/:roomId" element={<Room />} />
     </Routes>
   );

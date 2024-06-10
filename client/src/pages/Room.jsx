@@ -1,15 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSocket } from "../context/SocketProvider";
 import ReactPlayer from "react-player";
 import peer from "../service/peer";
 import useCallHandler from "../hooks/useCallHandlers";
 import useSocketEvent from "../hooks/useSocketEvents";
+import { useAuth } from "../context/AuthProvider";
+import { useNavigate } from "react-router-dom";
 
 export default function Room() {
   const socket = useSocket();
   const [remoteSocketId, setRemoteSocketId] = useState(null);
   const [myStream, setMyStream] = useState();
   const [remoteStream, setRemoteStream] = useState();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate("/login");
+    }
+  }, [user, navigate]);
 
   const handlers = useCallHandler(socket, remoteSocketId, setRemoteSocketId, myStream, setMyStream);
 

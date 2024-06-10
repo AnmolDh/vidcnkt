@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSocket } from "../context/SocketProvider";
+import { useAuth } from "../context/AuthProvider";
 
 export default function Lobby() {
   const [userDetail, SetUserDetail] = useState({
@@ -9,8 +10,14 @@ export default function Lobby() {
   });
 
   const socket = useSocket();
-
+  const { user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate("/login");
+    }
+  }, [user, navigate]);
 
 
   const handleUserDetail = (e) => {
