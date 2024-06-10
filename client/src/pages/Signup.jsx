@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import axios from "../api/api";
 
 export default function Signup() {
   const [signupDetails, setSignupDetails] = useState({
@@ -17,11 +17,15 @@ export default function Signup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await axios.post(
-      `${process.env.REACT_APP_SERVER_URL}/signup`,
+    const {data} = await axios.post(
+      `/signup`,
       signupDetails
     );
-    console.log(res.data);
+    if (data.success == true) {
+      localStorage.setItem("token", data.token);
+    } else {
+      console.log(data);
+    }
   };
 
   return (

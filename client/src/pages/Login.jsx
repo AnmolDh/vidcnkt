@@ -1,5 +1,5 @@
 import { useState } from "react"
-import axios from "axios";
+import axios from "../api/api";
 
 export default function Login() {
   const [loginDetails, setLoginDetails] = useState({
@@ -16,8 +16,12 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await axios.post(`${process.env.REACT_APP_SERVER_URL}/login`, loginDetails);
-    console.log(res.data);
+    const {data} = await axios.post(`/login`, loginDetails);
+    if (data.success == true) {
+      localStorage.setItem("token", data.token);
+    } else {
+      console.log(data);
+    }
   }
 
   return <>

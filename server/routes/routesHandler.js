@@ -2,6 +2,7 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { User } = require("../models/models");
+const authenticateToken = require("../handlers/authHandler");
 const app = express();
 
 app.get("/", (req, res) => {
@@ -32,6 +33,10 @@ app.post("/login", async (req, res) => {
 
   const token = jwt.sign({ userId: email }, process.env.JWT_SECRET);
   res.json({ success: true, token });
+});
+
+app.get("/protected", authenticateToken, (req, res) => {
+  console.log("protected route working!!");
 });
 
 module.exports = app;
