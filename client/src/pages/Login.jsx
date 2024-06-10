@@ -1,11 +1,14 @@
 import { useState } from "react"
 import axios from "../api/api";
+import { useAuth } from "../context/AuthProvider";
 
 export default function Login() {
   const [loginDetails, setLoginDetails] = useState({
     email: "",
     password: ""
   })
+
+  const auth = useAuth();
 
   const handleInput = (e) => {
     setLoginDetails({
@@ -19,6 +22,7 @@ export default function Login() {
     const {data} = await axios.post(`/login`, loginDetails);
     if (data.success == true) {
       localStorage.setItem("token", data.token);
+      auth.setUser(data.userId);
     } else {
       console.log(data);
     }
@@ -34,5 +38,6 @@ export default function Login() {
 
       <button type="submit" onClick={handleSubmit}>login</button>
     </form>
+    <button onClick={() => {console.log(auth.user)}}>test</button>
   </>
 }

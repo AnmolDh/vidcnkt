@@ -15,7 +15,7 @@ app.post("/signup", async (req, res) => {
   const user = new User({ name, email, password: hashedPassword });
   await user.save();
   const token = jwt.sign({ userId: email }, process.env.JWT_SECRET);
-  res.json({ success: true, token });
+  res.json({ success: true, userId: email, token });
 });
 
 app.post("/login", async (req, res) => {
@@ -32,7 +32,7 @@ app.post("/login", async (req, res) => {
   }
 
   const token = jwt.sign({ userId: email }, process.env.JWT_SECRET);
-  res.json({ success: true, token });
+  res.json({ success: true, userId: email, token });
 });
 
 app.get("/protected", authenticateToken, (req, res) => {

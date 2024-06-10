@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "../api/api";
+import { useAuth } from "../context/AuthProvider";
 
 export default function Signup() {
   const [signupDetails, setSignupDetails] = useState({
@@ -7,6 +8,7 @@ export default function Signup() {
     email: "",
     password: "",
   });
+  const auth = useAuth();
 
   const handleInput = (e) => {
     setSignupDetails({
@@ -23,6 +25,7 @@ export default function Signup() {
     );
     if (data.success == true) {
       localStorage.setItem("token", data.token);
+      auth.setUser(data.userId);
     } else {
       console.log(data);
     }
