@@ -4,7 +4,7 @@ import { useSocket } from "../context/SocketProvider";
 import { useAuth } from "../context/AuthProvider";
 
 export default function Lobby() {
-  const [userDetail, SetUserDetail] = useState({
+  const [userDetail, setUserDetail] = useState({
     email: "",
     room: "",
   });
@@ -14,14 +14,20 @@ export default function Lobby() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
+    if (!user) {
       navigate("/login");
     }
   }, [user, navigate]);
 
+  useEffect(() => {
+    setUserDetail(prev => ({
+      ...prev,
+      email: user ? user : ""
+    }))
+  }, [user]);
 
   const handleUserDetail = (e) => {
-    SetUserDetail({
+    setUserDetail({
       ...userDetail,
       [e.target.id]: e.target.value,
     });
@@ -31,6 +37,7 @@ export default function Lobby() {
     (e) => {
       e.preventDefault();
       socket.emit("room:join", userDetail);
+      console.log(userDetail)
     },
     [socket, userDetail]
   );
@@ -50,15 +57,6 @@ export default function Lobby() {
       <h1>Lobby</h1>
       <br />
       <form onSubmit={handleSubmit}>
-        <label htmlFor="email">Email ID</label>
-        <input
-          type="email"
-          id="email"
-          value={userDetail.email}
-          onChange={handleUserDetail}
-        ></input>
-        <br />
-        <br />
         <label htmlFor="room">Room ID</label>
         <input
           type="text"

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../api/api";
 import { useAuth } from "../context/AuthProvider";
@@ -11,12 +11,6 @@ export default function Login() {
 
   const auth = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (auth.user) {
-      navigate("/lobby");
-    }
-  }, [auth.user, navigate]);
 
   const handleInput = (e) => {
     setLoginDetails({
@@ -31,6 +25,7 @@ export default function Login() {
     if (data.success === true) {
       localStorage.setItem("token", data.token);
       auth.setUser(data.userId);
+      navigate("/lobby");
     } else {
       console.log(data);
     }
